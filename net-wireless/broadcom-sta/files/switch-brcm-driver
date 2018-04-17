@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Desc: support broadcom-sta for mac2013
+#
+# Broadcom Linux hybrid wireless driver
+# Release Version: 6.30.223.271
+#
+# SUPPORTED DEVICES
+# -----------------
+# The cards with the following PCI Device IDs are supported with this driver.
+# Both Broadcom and and Dell product names are described.   Cards not listed
+# here may also work.
+#
+#            BRCM             PCI           PCI             Dell
+#           Product Name    Vendor ID     Device ID       Product ID
+#           -------------  ----------     ---------       -----------
+#           4311 2.4 Ghz      0x14e4      0x4311          Dell 1390
+#           4311 Dualband     0x14e4      0x4312          Dell 1490
+#           4311 5 Ghz        0x14e4      0x4313
+#           4312 2.4 Ghz      0x14e4      0x4315          Dell 1395
+#           4313 2.4 Ghz      0x14e4      0x4727          Dell 1501/1504
+#           4321 Dualband     0x14e4      0x4328          Dell 1505
+#           4321 Dualband     0x14e4      0x4328          Dell 1500
+#           4321 2.4 Ghz      0x14e4      0x4329
+#           4321 5 Ghz        0x14e4      0x432a
+#           4322  Dualband    0x14e4      0x432b          Dell 1510
+#           4322 2.4 Ghz      0x14e4      0x432c
+#           4322 5 Ghz        0x14e4      0x432d
+#           43142 2.4 Ghz     0x14e4      0x4365
+#           43224 Dualband    0x14e4      0x4353          Dell 1520
+#           43225 2.4 Ghz     0x14e4      0x4357
+#           43227 2.4 Ghz     0x14e4      0x4358
+#           43228 Dualband    0x14e4      0x4359          Dell 1530/1540
+#           4331  Dualband    0x14e4      0x4331
+#           4360  Dualband    0x14e4      0x43a0
+#           4352  Dualband    0x14e4      0x43a0
+
+# Opensource drivers list
+BRCM_MODULES=("b43" "b43legacy" "ssb" "bcm43xx" "brcm80211" "brcmfmac" "brcmsmac" "brcmutil" "bcma")
+# Closed source driver list
+WL_MODULES=("wl")
+
+blacklist() {
+	local listname=$1[@]
+	local MODULES=("${!listname}")
+
+	local conf=/etc/modprobe.d/flintos-brcm.conf
+
+	mkdir -p $(dirname ${conf})
+	rm -f ${conf}
+	touch ${conf}
+
+	for ((i=0; i<${#MODULES[@]}; i++)); do
+		echo "blacklist ${MODULES[$i]}" >> ${conf}
+		echo "install ${MODULES[$i]} /bin/true" >> ${conf}
+	done
+}
+
+askreboot() {
+	echo "Please reboot for the change to take effective."
+}
+
+switch2wl() {
+	mount -o remount,rw /
+	blacklist BRCM_MODULES
+	mount -o remount,ro /
+	echo -e "The wl closed source driver is enabled.\n"
+}
+
+switch2brcm() {
+	mount -o remount,rw /
+	blacklist WL_MODULES
+	mount -o remount,ro /
+	echo -e "The brcm open source driver is enabled.\n"
+}
+
+help() {
+	echo "Usage: $0 wl | brcm
+Switch between the closed source wl driver or the open source brcm dirver for Broadcom WIFI chipsets."
+	exit
+}
+
+# Check whether the script is run by root
+if [ $(id -u) -ne 0 ]; then
+	echo "You must be root to run this script."
+	exit 1
+fi
+
+case "$1" in
+	wl)
+		switch2wl
+		askreboot
+		;;
+	brcm)
+		switch2brcm
+		askreboot
+		;;
+	*)
+		help
+		;;
+esac

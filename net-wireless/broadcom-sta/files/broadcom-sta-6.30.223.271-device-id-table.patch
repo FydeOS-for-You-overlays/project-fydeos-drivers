@@ -1,0 +1,49 @@
+diff -Nurp -Nurp broadcom-sta-6.30.223.271.orig/src/wl/sys/wl_linux.c broadcom-sta-6.30.223.271/src/wl/sys/wl_linux.c
+--- broadcom-sta-6.30.223.271.orig/src/wl/sys/wl_linux.c	2015-09-19 06:47:30.000000032 +0800
++++ broadcom-sta-6.30.223.271/src/wl/sys/wl_linux.c	2017-09-21 18:16:55.845000000 +0800
+@@ -158,11 +158,40 @@ static void wl_report_radio_state(wl_inf
+ 
+ MODULE_LICENSE("MIXED/Proprietary");
+ 
+-static struct pci_device_id wl_id_table[] =
+-{
+-	{ PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID, PCI_ANY_ID,
+-	PCI_CLASS_NETWORK_OTHER << 8, 0xffff00, 0 },
+-	{ 0 }
++#define BRCMF_PCIE_DEVICE(dev_id)	{ PCI_VENDOR_ID_BROADCOM, dev_id,\
++	PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_NETWORK_OTHER << 8, 0xffff00, 0 }
++
++/*
++
++Useful links:
++  https://wiki.debian.org/wl
++  https://wireless.wiki.kernel.org/en/users/drivers/b43
++Below table is created acccording to the first link.
++
++*/
++
++static struct pci_device_id wl_id_table[] = {
++	BRCMF_PCIE_DEVICE(0x4311), // BCM4311
++	BRCMF_PCIE_DEVICE(0x4312), // BCM4311
++	BRCMF_PCIE_DEVICE(0x4315), // BCM4312
++	BRCMF_PCIE_DEVICE(0x4727), // BCM4313
++	BRCMF_PCIE_DEVICE(0x4328), // BCM4321
++	BRCMF_PCIE_DEVICE(0x4329), // BCM4321
++	BRCMF_PCIE_DEVICE(0x432a), // BCM4321
++	BRCMF_PCIE_DEVICE(0x432b), // BCM4322
++	BRCMF_PCIE_DEVICE(0x432c), // BCM4322
++	BRCMF_PCIE_DEVICE(0x432d), // BCM4322
++	BRCMF_PCIE_DEVICE(0x4331), // BCM4331
++	BRCMF_PCIE_DEVICE(0x43b1), // BCM4352
++	BRCMF_PCIE_DEVICE(0x4360), // BCM4360
++	BRCMF_PCIE_DEVICE(0x43a0), // BCM4360
++	BRCMF_PCIE_DEVICE(0x0576), // BCM43224
++	BRCMF_PCIE_DEVICE(0x4353), // BCM43224
++	BRCMF_PCIE_DEVICE(0x4357), // BCM43225
++	BRCMF_PCIE_DEVICE(0x4358), // BCM43227
++	BRCMF_PCIE_DEVICE(0x4359), // BCM43228
++	BRCMF_PCIE_DEVICE(0x4365), // BCM43142
++	{0}
+ };
+ 
+ MODULE_DEVICE_TABLE(pci, wl_id_table);
