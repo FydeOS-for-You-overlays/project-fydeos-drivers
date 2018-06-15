@@ -18,7 +18,7 @@ SRC_URI=""
 LICENSE="BSD-Google"
 SLOT="0"
 KEYWORDS="*"
-VIDEO_CARDS="amdgpu exynos intel marvell mediatek radeon radeonsi rockchip tegra virgl vc4"
+VIDEO_CARDS="amdgpu exynos intel marvell mediatek radeon radeonsi rockchip tegra virgl vc4 nouveau"
 IUSE="-asan"
 for card in ${VIDEO_CARDS}; do
 	IUSE+=" video_cards_${card}"
@@ -33,6 +33,7 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig"
 
 src_prepare() {
+    epatch ${FILESDIR}/add-vc4-nouveau.patch
 	asan-setup-env
 	cros-workon_src_prepare
 }
@@ -50,6 +51,7 @@ src_configure() {
 	use video_cards_amdgpu && append-cppflags -DDRV_AMDGPU && export DRV_AMDGPU=1
 	use video_cards_virgl && append-cppflags -DDRV_VIRGL && export DRV_VIRGL=1
     use video_cards_vc4 && append-cppflags -DDRV_VC4 && export DRV_VC4=1
+    use video_cards_nouveau && append-cppflags -DDRV_NOUVEAU && export DRV_NOUVEAU=1
 	cros-workon_src_configure
 }
 
