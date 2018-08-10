@@ -9,7 +9,7 @@ HOMEPAGE="http://fydeos.com"
 LICENSE="BSD-Google"
 SLOT="0"
 KEYWORDS="*"
-IUSE="arc"
+IUSE="fydeos_arc"
 
 RDEPEND=""
 
@@ -19,5 +19,5 @@ S=${WORKDIR}
 src_install() {
     insinto /etc/camera
     doins ${FILESDIR}/camera_characteristics.conf
-    use arc && arc-camera_gen_and_install_rules
+    use fydeos_arc && arc-camera_gen_and_install_rules
 }
