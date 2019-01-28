@@ -25,6 +25,7 @@ IUSE_KERNEL_VERS=(
 	kernel-4_4
 	kernel-4_12
 	kernel-4_14
+    kernel-4_19
 )
 IUSE="${IUSE_KERNEL_VERS[*]}"
 REQUIRED_USE="?? ( ${IUSE_KERNEL_VERS[*]} )"
@@ -97,6 +98,10 @@ src_prepare() {
 		${FILESDIR}/${PN}-6.30.223.271-r4-linux-4.14.patch
 	)
 
+    PATCHES_4_19=(
+        ${FILESDIR}/${PN}-6.30.223.271-r4-linux-4.15.patch
+    )
+
 	PATCHES=("${PATCHES_COMMON[@]}")
 	if use kernel-3_18; then
 		einfo "Applying patches for kernel 3.18"
@@ -110,6 +115,9 @@ src_prepare() {
 	elif use kernel-4_14; then
 		einfo "Applying patches for kernel 4.14"
 		PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}")
+    elif use kernel-4_19; then
+        einfo "Applying patches for kernel 4.19"
+        PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}" "${PATCHES_4_19[@]}")
 	fi
 
 	epatch ${PATCHES[@]}
