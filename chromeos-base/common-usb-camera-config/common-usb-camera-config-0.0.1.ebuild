@@ -9,7 +9,7 @@ HOMEPAGE="http://fydeos.com"
 LICENSE="BSD-Google"
 SLOT="0"
 KEYWORDS="*"
-IUSE="fydeos_arc"
+IUSE="fydeos_arc android-container-pi"
 
 RDEPEND=""
 
@@ -18,6 +18,8 @@ S=${WORKDIR}
 
 src_install() {
     insinto /etc/camera
-    doins ${FILESDIR}/camera_characteristics.conf
-    use fydeos_arc && arc-camera_gen_and_install_rules
+    if ! use android-container-pi;then 
+        doins ${FILESDIR}/camera_characteristics.conf
+        use fydeos_arc && arc-camera_gen_and_install_rules
+    fi
 }
