@@ -3,15 +3,17 @@
 
 EAPI=5
 
-inherit git-2
+EGIT_REPO_URI="https://github.com/onitake/gsl-firmware.git"
+#EGIT_BRANCH="master"
+#EGIT_HAS_SUBMODULES="true"
+#EGIT_NONBARE="true"
+#EGIT_COMMIT="9bb83d06904151b98c1faa1d7540497e17195993"
 
+inherit git-r3
 DESCRIPTION="Firmware for silead mmsl1680 touchscreen"
 HOMEPAGE="https://github.com/onitake/gsl-firmware"
 
-EGIT_REPO_URI="https://github.com/onitake/gsl-firmware.git"
-EGIT_BRANCH="master"
-#EGIT_COMMIT="ae83b2833546a146636bf442344ab51c2c7886d2"
-
+SRC_URI=""
 LICENSE="GPL-3"
 KEYWORDS="-* amd64 x86"
 IUSE=""
@@ -23,6 +25,6 @@ RDEPEND=""
 
 src_install() {
 	insinto /lib/firmware
-	doins firmware/cube/i1101/silead_ts.fw || die
-    doins -r firmware/linux/silead 
+#	doins firmware/cube/i1101/silead_ts.fw || die
+  doins -r firmware/linux/silead 
 }
