@@ -1,8 +1,8 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-inherit eutils linux-info linux-mod
+EAPI=6
+inherit eutils linux-info linux-mod toolchain-funcs
 
 DESCRIPTION="Broadcom's IEEE 802.11a/b/g/n hybrid Linux device driver"
 HOMEPAGE="https://www.broadcom.com/support/802.11"
@@ -25,7 +25,8 @@ IUSE_KERNEL_VERS=(
 	kernel-4_4
 	kernel-4_12
 	kernel-4_14
-    kernel-4_19
+  kernel-4_19
+  kernel-5_4
 )
 IUSE="${IUSE_KERNEL_VERS[*]}"
 REQUIRED_USE="?? ( ${IUSE_KERNEL_VERS[*]} )"
@@ -43,7 +44,7 @@ pkg_setup() {
 	# NOTE<lxnay>: module builds correctly anyway with b43 and SSB enabled
 	# make checks non-fatal. The correct fix is blackisting ssb and, perhaps
 	# b43 via udev rules. Moreover, previous fix broke binpkgs support.
-	CONFIG_CHECK="~!B43 ~!BCMA ~!SSB"
+	CONFIG_CHECK="~!B43 ~!BCMA ~!SSB ~!CC_IS_CLANG"
 	CONFIG_CHECK2="LIB80211 ~!MAC80211 ~LIB80211_CRYPT_TKIP"
 	ERROR_B43="B43: If you insist on building this, you must blacklist it!"
 	ERROR_BCMA="BCMA: If you insist on building this, you must blacklist it!"
@@ -71,6 +72,7 @@ pkg_setup() {
 }
 
 src_prepare() {
+  einfo "kv_out_dir=" ${KV_OUT_DIR} " M=${S}"
 	PATCHES_COMMON=(
 		${FILESDIR}/${PN}-6.30.223.141-makefile.patch
 		${FILESDIR}/${PN}-6.30.223.141-eth-to-wlan.patch
@@ -98,31 +100,43 @@ src_prepare() {
 		${FILESDIR}/${PN}-6.30.223.271-r4-linux-4.14.patch
 	)
 
-    PATCHES_4_19=(
-        ${FILESDIR}/${PN}-6.30.223.271-r4-linux-4.15.patch
-    )
+  PATCHES_4_19=(
+    ${FILESDIR}/${PN}-6.30.223.271-r4-linux-4.15.patch
+  )
+
+  PATCHES_5_4=(
+    ${FILESDIR}/${PN}-6.30.223.271-r5-linux-5.1.patch
+  )
 
 	PATCHES=("${PATCHES_COMMON[@]}")
 	if use kernel-3_18; then
 		einfo "Applying patches for kernel 3.18"
 		PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}")
-	elif use kernel-4_4; then
+  fi
+	if use kernel-4_4; then
 		einfo "Applying patches for kernel 4.4"
 		PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}")
-	elif use kernel-4_12; then
+  fi
+	if use kernel-4_12; then
 		einfo "Applying patches for kernel 4.12"
 		PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}")
-	elif use kernel-4_14; then
+  fi
+	if use kernel-4_14; then
 		einfo "Applying patches for kernel 4.14"
 		PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}")
-    elif use kernel-4_19; then
-        einfo "Applying patches for kernel 4.19"
-        PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}" "${PATCHES_4_19[@]}")
+  fi
+  if use kernel-4_19; then
+    einfo "Applying patches for kernel 4.19"
+    PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}" "${PATCHES_4_19[@]}")
+  fi
+  if use kernel-5_4; then
+    einfo "Applying patches for kernel 5.4"
+    PATCHES=("${PATCHES[@]}" "${PATCHES_3_18[@]}" "${PATCHES_4_4[@]}" "${PATCHES_4_12[@]}" "${PATCHES_4_14[@]}" "${PATCHES_4_19[@]}" "${PATCHES_5_4[@]}")
 	fi
 
 	epatch ${PATCHES[@]}
 
-	epatch_user
+	eapply_user
 }
 
 src_install() {
