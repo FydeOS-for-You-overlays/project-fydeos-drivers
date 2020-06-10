@@ -44,6 +44,16 @@ pkg_setup() {
 	# NOTE<lxnay>: module builds correctly anyway with b43 and SSB enabled
 	# make checks non-fatal. The correct fix is blackisting ssb and, perhaps
 	# b43 via udev rules. Moreover, previous fix broke binpkgs support.
+  if use kernel-4_14; then
+    export KERNEL_DIR="/mnt/host/source/src/third_party/kernel/v4.14"
+  fi
+  if use kernel-4_19; then
+    export KERNEL_DIR="/mnt/host/source/src/third_party/kernel/v4.19"
+  fi
+  if use kernel-5_4; then
+    export KERNEL_DIR="/mnt/host/source/src/third_party/kernel/v5.4"
+  fi
+  export KBUILD_OUTPUT=${ROOT}usr/src/linux
 	CONFIG_CHECK="~!B43 ~!BCMA ~!SSB ~!CC_IS_CLANG"
 	CONFIG_CHECK2="LIB80211 ~!MAC80211 ~LIB80211_CRYPT_TKIP"
 	ERROR_B43="B43: If you insist on building this, you must blacklist it!"
@@ -64,10 +74,13 @@ pkg_setup() {
 	else
 		CONFIG_CHECK="${CONFIG_CHECK} IEEE80211 IEEE80211_CRYPT_TKIP"
 	fi
+  #export KV_OUT_DIR=$KBUILD_OUTPUT
+  einfo KERNEL_DIR:$KERNEL_DIR KV_DIR:$KV_DIR KBUILD_OUTPUT:$KBUILD_OUTPUT KV_OUT_DIR:$KV_OUT_DIR \
+    KV_FULL:$KV_FULL
 
 	linux-mod_pkg_setup
 
-	BUILD_PARAMS="-C ${KV_OUT_DIR} M=${S}"
+	BUILD_PARAMS="-C ${KERNEL_DIR} -I${KBUILD_OUTPUT} O=${KBUILD_OUTPUT} M=${S}"
 	BUILD_TARGETS="wl.ko"
 }
 

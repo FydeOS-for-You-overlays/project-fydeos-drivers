@@ -1,0 +1,3 @@
+pre-start script
+  exec /bin/sh /usr/share/cros/init/tcsd-pre-start-tpm.sh
+end script

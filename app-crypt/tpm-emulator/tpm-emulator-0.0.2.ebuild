@@ -8,7 +8,7 @@ EGIT_REPO_URI="git@gitlab.fydeos.xyz:misc/tpm-emulator.git"
 EGIT_BRANCH="github_master"
 #EGIT_COMMIT="268acb688c41643175bc244decd5bb6fa288c38f"
 
-inherit cmake-utils git-2 toolchain-funcs linux-info linux-mod
+inherit cmake-utils git-2 toolchain-funcs fydeos-kernel-module
 
 DESCRIPTION="TPM Emulator with small google-local changes"
 LICENSE="GPL-2"
@@ -22,9 +22,7 @@ DEPEND="app-crypt/trousers
 
 RDEPEND="
 	${DEPEND}
-	virtual/linux-sources
 "
-
 
 src_configure() {
 	tc-export CC CXX LD AR RANLIB NM
@@ -33,15 +31,13 @@ src_configure() {
 
 src_compile() {
 	# KV_OUT_DIR is declared by not exported by portage, export it so it will be visible in below make stage
-	export KV_OUT_DIR
-
-	# Unset ARCH as it interfere with kernel module buiding. Kernel expects x86_64 while portage sets amd64.
 	unset ARCH
 
 	# This kernel header file is required to build the kernel module but not included in the source, copy it
 	# from the kernel source tree we build against.
-	cp ${KV_OUT_DIR}/drivers/char/tpm/tpm.h ${S}/tpmd_dev/linux/tpm.h
-
+	cp ${KERNEL_DIR}/drivers/char/tpm/tpm.h ${S}/tpmd_dev/linux/tpm.h
+  cp ${KERNEL_DIR}/drivers/char/tpm/tpm_tis_core.h ${S}/tpmd_dev/linux/tpm_tis_core.h
+  einfo KERNEL_RELEASE: ${KERNEL_RELEASE} KV_OUT_DIR: ${KV_OUT_DIR}
 	cmake-utils_src_compile
 	# This would be normally done in kernel module build, but we have
 	# copied the kernel module to the kernel tree.
@@ -77,6 +73,7 @@ src_install() {
 	insinto /etc/init
 	doins etc/init/tpm-emulator.conf
 	doins etc/init/tpm-probe.override
-    insinto /usr/share/cros/init
-    doins ${FILESDIR}/tcsd-pre-start.sh
+  doins ${FILESDIR}/tcsd.override
+  insinto /usr/share/cros/init
+  doins ${FILESDIR}/tcsd-pre-start-tpm.sh
 }
